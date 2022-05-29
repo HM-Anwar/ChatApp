@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../application/chat_bloc/chat_bloc.dart';
 import '../main.dart';
 import 'chat_room.dart';
 import 'friend_list.dart';
@@ -176,67 +177,83 @@ class ChatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: isUserGet
-          ? FloatingActionButton(
-              backgroundColor: Color(0xff5b61b9),
-              elevation: 4,
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => FriendList()));
-              },
-              child: Icon(Icons.chat_rounded),
-            )
-          : Container(),
-      body: Column(children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              // borderRadius: BorderRadius.only(
-              //   topLeft: Radius.circular(25),
-              //   topRight: Radius.circular(25),
-              // ),
-            ),
-            child: ListView(
-              children: [
-                Column(
-                  children: [
-                    ...users.map(
-                      (e) => GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatRoom(chatPartner: e),
+    return BlocProvider(
+      create: (context) => ChatBloc(users[1].uid),
+      child: BlocBuilder<ChatBloc, ChatState>(
+        builder: (context, state) {
+          return Scaffold(
+            floatingActionButton: isUserGet
+                ? FloatingActionButton(
+                    backgroundColor: Color(0xff5b61b9),
+                    elevation: 4,
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FriendList()));
+                    },
+                    child: Icon(Icons.chat_rounded),
+                  )
+                : Container(),
+            body: Column(children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    // borderRadius: BorderRadius.only(
+                    //   topLeft: Radius.circular(25),
+                    //   topRight: Radius.circular(25),
+                    // ),
+                  ),
+                  child: ListView(
+                    children: [
+                      Column(
+                        children: [
+                          ...users.map(
+                            (e) => GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChatRoom(chatPartner: e),
+                                  ),
+                                );
+                              },
+                              child: ListTile(
+                                leading: e.image == ''
+                                    ? CircleAvatar(
+                                        backgroundColor: Color(0xff5b61b9),
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 30,
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        backgroundImage: NetworkImage(e.image),
+                                      ),
+                                title: Text(e.name),
+                                subtitle: Text(e.email),
+                                trailing: state.isSeen
+                                    ? null
+                                    : CircleAvatar(
+                                        radius: 8,
+                                        backgroundColor: Colors.teal.shade200,
+                                      ),
+                              ),
                             ),
-                          );
-                        },
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Color(0xff5b61b9),
-                            child: Icon(
-                              Icons.person,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          title: Text(e.name),
-                          subtitle: Text("last message like hi,how are you?"),
-                          trailing: CircleAvatar(
-                            radius: 8,
-                            backgroundColor: Colors.teal.shade200,
-                          ),
-                        ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ]),
+              ),
+            ]),
+          );
+        },
+      ),
     );
   }
 }
@@ -252,7 +269,9 @@ class ProfileScreen extends StatelessWidget {
       body: FutureBuilder<UserModel>(
           future: UserService().getCurrentUserInfo(),
           builder: (context, snapshot) {
-            if (snapshot.hasData)
+            if (snapshot.hasData) {
+              final user = snapshot.data!;
+
               return Column(children: [
                 Expanded(
                   child: Container(
@@ -270,38 +289,41 @@ class ProfileScreen extends StatelessWidget {
                                   fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             SizedBox(height: 18),
-                            CircleAvatar(
-                              backgroundColor: Color(0xff5b61b9),
-                              radius: 56,
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 80,
-                              ),
-                            ),
+                            user.image == ''
+                                ? CircleAvatar(
+                                    backgroundColor: Color(0xff5b61b9),
+                                    radius: 56,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                      size: 80,
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    radius: 56,
+                                    backgroundImage: NetworkImage(user.image),
+                                  ),
                             SizedBox(height: 8),
                             Card(
                               child: Container(
                                 padding: EdgeInsets.all(12),
-                                child: Text('Name: ' + snapshot.data!.name),
+                                child: Text('Name: ' + user.name),
                               ),
                             ),
                             Card(
                                 child: Container(
                                     padding: EdgeInsets.all(12),
-                                    child: Text(
-                                        'Email: ' + snapshot.data!.email))),
+                                    child: Text('Email: ' + user.email))),
                             Card(
                                 child: Container(
                                     padding: EdgeInsets.all(12),
-                                    child: Text('Contact no: ' +
-                                        snapshot.data!.contact))),
+                                    child:
+                                        Text('Contact no: ' + user.contact))),
                             Card(
                                 child: Container(
                                     padding: EdgeInsets.all(12),
                                     child: Text(
-                                      'Date of Birth: ' +
-                                          snapshot.data!.dob.toString(),
+                                      'Date of Birth: ' + user.dob.toString(),
                                     ))),
                           ],
                         ),
@@ -310,7 +332,11 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ]);
-            return Container();
+            }
+            return Container(
+              color: Colors.white,
+              child: Center(child: CircularProgressIndicator()),
+            );
           }),
     );
   }

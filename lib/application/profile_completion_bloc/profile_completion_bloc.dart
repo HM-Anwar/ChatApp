@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:chat_app/services/profile_completion_service.dart';
@@ -17,10 +18,20 @@ class ProfileCompletionBloc
     on<OnContactChanged>(
         (event, emit) => emit(state.copyWith(contactNo: event.contactNo)));
 
+    on<OnFileChanged>((event, emit) => emit(state.copyWith(file: event.file)));
+
+    on<OnImageUrlChanged>(
+        (event, emit) => emit(state.copyWith(imageUrl: event.imageUrl)));
+
     on<OnDateChanged>(
         (event, emit) => emit(state.copyWith(dateOfBirth: event.dateOfBirth)));
 
     on<OnSubmitPressed>((event, emit) async {
+      if (state.file != null) {
+        String downloadUrl =
+            await ProfileCompletionService().uploadProfileImage(state.file!);
+        emit(state.copyWith(imageUrl: downloadUrl));
+      }
       final currentUser = FirebaseAuth.instance.currentUser!;
       bool createUser = await ProfileCompletionService().createUser(
         uid: currentUser.uid,
@@ -28,7 +39,7 @@ class ProfileCompletionBloc
         contactNo: state.contactNo,
         dateOfBirth: state.dateOfBirth,
         email: currentUser.email.toString(),
-        image: '',
+        image: state.imageUrl,
         // friendRequest: 'none',
       );
 

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_app/application/profile_completion_bloc/profile_completion_bloc.dart';
 import 'package:chat_app/screens/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,7 +18,6 @@ class ProfileCompletion extends StatefulWidget {
 }
 
 class _ProfileCompletionState extends State<ProfileCompletion> {
-  File? file;
   bool icon = true;
 
   @override
@@ -91,11 +91,12 @@ class _ProfileCompletionState extends State<ProfileCompletion> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: getImage,
+                              onTap: () => getImage(context),
                               child: CircleAvatar(
                                 radius: 70,
-                                backgroundImage:
-                                    file != null ? FileImage(file!) : null,
+                                backgroundImage: state.file != null
+                                    ? FileImage(state.file!)
+                                    : null,
                                 child: icon ? Icon(Icons.camera_alt) : null,
                               ),
                             ),
@@ -116,7 +117,7 @@ class _ProfileCompletionState extends State<ProfileCompletion> {
                                     elevation: 0,
                                     primary: Color(0xff5b61b9),
                                   ),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     context
                                         .read<ProfileCompletionBloc>()
                                         .add(OnSubmitPressed());
@@ -145,11 +146,11 @@ class _ProfileCompletionState extends State<ProfileCompletion> {
     );
   }
 
-  Future getImage() async {
+  Future getImage(BuildContext ctx) async {
     XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image != null) {
+      ctx.read<ProfileCompletionBloc>().add(OnFileChanged(File(image.path)));
       setState(() {
-        file = File(image.path);
         icon = false;
       });
     }

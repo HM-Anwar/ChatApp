@@ -19,4 +19,16 @@ class OnDateChanged extends ProfileCompletionEvent {
   OnDateChanged(this.dateOfBirth);
 }
 
+class OnFileChanged extends ProfileCompletionEvent {
+  final File file;
+
+  OnFileChanged(this.file);
+}
+
+class OnImageUrlChanged extends ProfileCompletionEvent {
+  final String imageUrl;
+
+  OnImageUrlChanged(this.imageUrl);
+}
+
 class OnSubmitPressed extends ProfileCompletionEvent {}
