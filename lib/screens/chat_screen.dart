@@ -2,6 +2,7 @@ import 'package:chat_app/constants.dart';
 import 'package:chat_app/model/friend_request_model.dart';
 import 'package:chat_app/model/user_model.dart';
 import 'package:chat_app/screens/splash_screen.dart';
+import 'package:chat_app/screens/user_screen.dart';
 import 'package:chat_app/services/friend_service.dart';
 import 'package:chat_app/services/service_locator.dart';
 import 'package:chat_app/services/user_service.dart';
@@ -97,7 +98,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: TabBarView(controller: tabController, children: [
                           ChatsScreen(
                             users: users,
-                            isUserGet: isUserGet,
                           ),
                           ProfileScreen(),
                         ]),
@@ -169,11 +169,9 @@ class ChatsScreen extends StatelessWidget {
   const ChatsScreen({
     Key? key,
     required this.users,
-    required this.isUserGet,
   }) : super(key: key);
 
   final List<UserModel> users;
-  final bool isUserGet;
 
   @override
   Widget build(BuildContext context) {
@@ -182,19 +180,6 @@ class ChatsScreen extends StatelessWidget {
       child: BlocBuilder<ChatBloc, ChatState>(
         builder: (context, state) {
           return Scaffold(
-            floatingActionButton: isUserGet
-                ? FloatingActionButton(
-                    backgroundColor: Color(0xff5b61b9),
-                    elevation: 4,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FriendList()));
-                    },
-                    child: Icon(Icons.chat_rounded),
-                  )
-                : Container(),
             body: Column(children: [
               Expanded(
                 child: Container(
@@ -254,90 +239,6 @@ class ChatsScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<UserModel>(
-          future: UserService().getCurrentUserInfo(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final user = snapshot.data!;
-
-              return Column(children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                    ),
-                    child: ListView(
-                      children: [
-                        Column(
-                          children: [
-                            SizedBox(height: 24),
-                            Text(
-                              'PROFILE INFORMATION',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
-                            SizedBox(height: 18),
-                            user.image == ''
-                                ? CircleAvatar(
-                                    backgroundColor: Color(0xff5b61b9),
-                                    radius: 56,
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 80,
-                                    ),
-                                  )
-                                : CircleAvatar(
-                                    radius: 56,
-                                    backgroundImage: NetworkImage(user.image),
-                                  ),
-                            SizedBox(height: 8),
-                            Card(
-                              child: Container(
-                                padding: EdgeInsets.all(12),
-                                child: Text('Name: ' + user.name),
-                              ),
-                            ),
-                            Card(
-                                child: Container(
-                                    padding: EdgeInsets.all(12),
-                                    child: Text('Email: ' + user.email))),
-                            Card(
-                                child: Container(
-                                    padding: EdgeInsets.all(12),
-                                    child:
-                                        Text('Contact no: ' + user.contact))),
-                            Card(
-                                child: Container(
-                                    padding: EdgeInsets.all(12),
-                                    child: Text(
-                                      'Date of Birth: ' + user.dob.toString(),
-                                    ))),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ]);
-            }
-            return Container(
-              color: Colors.white,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }),
     );
   }
 }

@@ -14,10 +14,10 @@ part 'chat_bloc.freezed.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   StreamSubscription? chatStream;
   ChatBloc(String chatPartnerUid) : super(ChatState.initial()) {
-    on<OnChatList>((event, emit) => emit(state.copyWith(chat: event.chat)));
-
     chatStream = ChatService().getChat(chatPartnerUid).listen((chat) {
       add(OnChatList(chat));
     });
+
+    on<OnChatList>((event, emit) => emit(state.copyWith(chat: event.chat)));
   }
 }

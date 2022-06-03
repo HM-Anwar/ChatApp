@@ -29,6 +29,19 @@ class ChatService {
     }
   }
 
+  Stream<List<ChatModel>> getCurrentChat() {
+    return FirebaseFirestore.instance
+        .collection("chats")
+        .where("uids", arrayContains: FirebaseAuth.instance.currentUser!.uid)
+        .where('isSeen', isEqualTo: 'false')
+        .snapshots()
+        .map((snapshot) {
+      List<ChatModel> data =
+          snapshot.docs.map((e) => ChatModel.fromJson(e.data())).toList();
+      return data;
+    });
+  }
+
   Stream<List<ChatModel>> getChat(String chatPartnerUid) {
     return FirebaseFirestore.instance
         .collection('chats')
