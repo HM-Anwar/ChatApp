@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chat_app/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -37,9 +38,11 @@ class ProfileCompletionService {
   }
 
   Future<String> uploadProfileImage(File file) async {
+    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+
     var reference = await FirebaseStorage.instance
         .refFromURL('gs://chat-application-9d0e4.appspot.com')
-        .child('ProfilePictures/image ');
+        .child('ProfilePictures/${currentUserUid}');
     var snapshot = await reference.putFile(file);
     var downloadUrl = await snapshot.ref.getDownloadURL();
     return downloadUrl;

@@ -140,7 +140,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ));
                                   },
                                   child: Text(
-                                    'SignUp',
+                                    'SignIn',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xff5b61b9)),
